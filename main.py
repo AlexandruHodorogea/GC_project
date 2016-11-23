@@ -2,6 +2,10 @@ import tkinter
 import turtle
 
 
+vert = []             # vectorul de puncte
+viewPoint = (-1, -1)  # punctul din care porneste aria vizibila
+
+
 root = tkinter.Tk()
 
 state = 1
@@ -28,9 +32,6 @@ tPV = turtle.RawTurtle(canvas)
 tPV.color("#468499")    # #B5CDD6 suprafata vizibila
 tPV.hideturtle()
 tPV.speed(10)
-
-vert = []
-viewPoint = (-1, -1)
 
 
 def onClick(ev):
