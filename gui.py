@@ -127,18 +127,13 @@ class Gui:
     ok = True
     vert = self.vert
     if len(vert) > 2:
-      # check if last segment can pe added
-      for i in range(1, len(vert)):
-        if intersection(vert[0], vert[-1], vert[i], vert[i-1]):
-          ok = False
-          print("Intersectie!!")
-
-      if ok:
+      if not polygon_intersection(vert[0], vert[-1], vert):
         draw_line(self.t, vert[-1], vert[0])
         self.completeDrawing = True
         self.state = 0
         print(vert)
       else:
+        print("Intersectie!!")
         draw_line(self.tErr, vert[-1], vert[0])
         self.tErr.clear()
     else:
