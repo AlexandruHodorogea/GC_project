@@ -49,9 +49,9 @@ def seIntersecteaza(A, B, C, D):
 	CD = (D[0] - C[0], D[1] - C[1])
 
 	if(testOr(A, B, C)*testOr(A, B, D) < 0 and testOr(C, D, A)*testOr(C, D, B) < 0):
-		return True
+		return True                                                                       # daca sunt in parti diferite
 	else:
-		return False
+		return False                                                                      # daca sunt de aceeasi parte sau exista un punct pe dreapta
 
 
 
@@ -59,42 +59,42 @@ def onClick(ev):
 	global state
 	global vert
 	if state == 1 and not completeDrawing:
-		print("State 1: ", ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y)
+		currentPoint = (ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y)
+		print("State 1: ", currentPoint)
 
 		if len(vert) == 0:
-			vert.append((ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y))
+			vert.append(currentPoint)
 			t.penup()
-			t.goto(ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y)
+			t.goto(currentPoint)
 			t.pendown()
 		else:
 			ok = True;   # folosit pentru intersectii (Daca e True => poate sa adauge o noua muchie)
-			currentPoint = (ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y)
+			
 			for i in range(1, len(vert)):                                                       # verifica intersectia ultimului segment posibil adaugat cu celelalte muchii deja adaugate
 				if seIntersecteaza(currentPoint, vert[-1], vert[i], vert[i-1]):
 					ok = False
 					print("Intersectie!!")
 
 			if ok:
-				t.goto(ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y)
+				t.goto(currentPoint)
 				if len(vert) <= 2:
-					vert.append((ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y))
+					vert.append(currentPoint)
 				else:
-					AB = (vert[-1][0] - vert[-2][0], vert[-1][0] - vert[-2][0])
-					BC = (ev.x - vert[-1][0], ev.y - vert[-1][0])
-					if AB[0]*BC[1] != AB[1]*BC[0]:                                                       #verifica daca ulimele 3 puncte sunt pe aceeasi dreapta
-						vert.append((ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y))
+					AB = (vert[-1][0] - vert[-2][0], vert[-1][1] - vert[-2][1])
+					BC = (currentPoint[0] - vert[-1][0], currentPoint[1] - vert[-1][1])
+					if AB[0]*BC[1] == AB[1]*BC[0]:                                              #verifica daca ulimele 3 puncte sunt coliniare
+						vert.pop()
+					vert.append(currentPoint)
 
 			else:
 				tErr.penup()
 				tErr.goto(vert[-1])
 				tErr.pendown()
-				tErr.goto(ev.x - canvas.winfo_width()//2, canvas.winfo_height()//2 - ev.y)
+				tErr.goto(currentPoint)
 				tErr.penup()
 				tErr.clear()
 			
-#
-		
-#
+
 
 	if state == 3:
 		tPV.clear()
