@@ -92,7 +92,7 @@ class Gui:
             del vert[-1]
           vert.append(currentPoint)
         else:
-          print("Intersection!!")
+          print("Intersection!")
           draw_line(self.tErr,vert[-1], currentPoint)
           self.tErr.clear()
         
@@ -133,14 +133,18 @@ class Gui:
         self.state = 0
         print(vert)
       else:
-        print("Intersectie!!")
         draw_line(self.tErr, vert[-1], vert[0])
         self.tErr.clear()
+        print("Intersection!")
     else:
       print("You need at least 3 points!")
 
   def comTriang(self):
     print("Not implemented!")
+    triangles = triangulation(self.vert, self.tPV)
+    self.t.color('green')
+    for t in triangles:
+      draw_line(self.t, t[0], t[2])
     self.stateLabel.set("Poligonul este triangulat")
     self.state = 0
 

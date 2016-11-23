@@ -1,3 +1,7 @@
+import math
+import time
+from drawing import draw_circle, draw_line
+
 def orientation_test(p1, p2, r):
   direction = p2[0] * r[1] + p1[0] * p2[1] + p1[1] * r[0] - \
     p1[1] * p2[0] - p2[1] * r[0] - p1[0] * r[1]
@@ -29,12 +33,67 @@ def colinear_points(A, B, C):
   if AB[0]*BC[1] == AB[1]*BC[0]:
     pass
 
+def length(A, B):
+  return sqrt(pow((A[0] - B[0]), 2) + pow((A[1] - B[1]), 2))
 
 
-def triangulation(vert):
-  print("Not implemented yet")
-  pass
+def get_angle(A, B, C):
+  return arccos((pow(length(A, B), 2) + pow(length(C, B),2) - pow(length(A, B), 2)) / 2 * length(A, B) * length(C, B)) / 3.14 * 180
 
+def preprocess(v):
+  first_point = 0
+  for i in range(len(v)):
+    first_point = i if v[i][0] > v[first_point][0] else first_point
+
+  nxt = first_point + 1
+  prev = first_point - 1
+
+  if first_point == 0:
+    prev = len(v) - 1
+  elif first_point == len(v) -1:
+    nxt = 0
+
+  secound_point = nxt if v[nxt][1] > v[prev][1] else prev
+
+  print(first_point, ' ,', secound_point)
+
+  if secound_point == 0 or secound_point == (len(v) -1):
+    (first_point, secound_point) = (secound_point, first_point)
+
+  if first_point < secound_point:
+    return v[first_point:] + v[:first_point]
+  else:
+    return list(reversed(v[:first_point + 1])) + list(reversed(v[first_point+1 : ]))
+
+
+
+def triangulation(vert, turtle):
+  aux_vert = preprocess(vert)
+  print(vert)
+  print(aux_vert)
+  queue = []
+  triangles = []
+  for i,p in enumerate(aux_vert):
+    queue.append(p)
+    time.sleep(4)
+    print("ADDED %s from pos %s" % (p, i))
+    turtle.color("green")
+    draw_circle(turtle, p, 5)
+    print(queue)
+    while len(queue) > 2 \
+          and orientation_test(queue[-3],queue[-1],queue[-2]) < 0 \
+          and not polygon_intersection(queue[-3],queue[-1],aux_vert):
+      triangles.append((queue[-3],queue[-2],queue[-1]))
+      print("REVOVED %s positon %s" % (str(queue[-2]), str(aux_vert.index(queue[-2]))))
+      turtle.color("blue")
+      draw_line(turtle, queue[-3], queue[-1])
+      turtle.color("red")
+      draw_circle(turtle, queue[-2], 5)
+      del queue[-2]
+      print(queue)
+  print(len(triangles))
+  print(len(vert))
+  return triangles
 
 def point_inside_polygon(point, vert):
   print("Not implemented yet")
