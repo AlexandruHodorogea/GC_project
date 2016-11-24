@@ -2,8 +2,8 @@ import tkinter
 import turtle
 import time
 from util import orientation_test, intersection, triangulation, \
-                 point_inside_polygon, polygon_intersection
-from drawing import draw_line, draw_circle
+                 point_inside_polygon, polygon_intersection, collinear_points
+from drawing import draw_line, draw_circle, draw_poly
 
 class Gui:
   # store state of the window
@@ -34,21 +34,33 @@ class Gui:
 
     # initialize turtles
     self.t = turtle.RawTurtle(self.canvas)
-    self.t.speed(4)
+    self.t.speed(5)
     self.t.hideturtle()
     self.tPV = turtle.RawTurtle(self.canvas)
     self.tPV.color("#468499") #B5CDD6 suprafata vizibila
     self.tPV.hideturtle()
-    self.tPV.speed(10)
+    self.tPV.speed(20)
     self.tErr = turtle.RawTurtle(self.canvas)
     self.tErr.color("red")
     self.tErr.hideturtle()
-    self.tErr.speed(5)
+    self.tErr.speed(10)
+    self.trianglualtion_lines_turtle = turtle.RawTurtle(self.canvas)
+    self.trianglualtion_lines_turtle.color("green")
+    self.trianglualtion_lines_turtle.hideturtle()
+    self.trianglualtion_lines_turtle.speed(5)
+    self.trianglualtion_points_turtle = turtle.RawTurtle(self.canvas)
+    self.trianglualtion_points_turtle.hideturtle()
+    self.trianglualtion_points_turtle.speed(20)
+
 
     # set on click event
     self.canvas.bind("<Button>", self.onClick)
 
     # initialize buttons 
+    read_drawing_button = tkinter.Button(self.frame, \
+      text = "Read Drawing", command = self.read_drawing_handler)
+    read_drawing_button.pack(fill='x')
+
     clear_screen_button = tkinter.Button(self.frame, \
       text = "Clear Drawing Area", command = self.comDesen)
     clear_screen_button.pack(fill='x')
@@ -86,8 +98,8 @@ class Gui:
         if not polygon_intersection(currentPoint, vert[-1], vert):
           draw_line(self.t, vert[-1], currentPoint)
           # check if last 3 points are collinear
-          # TODO: IMPORVE THIS
-          if len(vert) > 2 and orientation_test(vert[-2], vert[-1], currentPoint) == 0:
+          # TODO: IMPORVE THIS WITH DISTANCES
+          if len(vert) > 2 and collinear_points(vert[-2], vert[-1], currentPoint):
             # remove last point
             del vert[-1]
           vert.append(currentPoint)
@@ -99,10 +111,10 @@ class Gui:
     if self.state == 3:
       tPV.clear()
       draw_circle(tPV, currentPoint, 2)
-      if point_inside_polygon(currentPoint, vert):
-        print("Point is inside Polygon")
+      if not point_inside_polygon(self.triangles, currentPoint):
+        print("Point is not inside poly!")
       else:
-        print("Point is not inside Polygon")
+        print("Point is inside Polygon")
 
 
   def getCurrentPoint(self, ev):
@@ -111,6 +123,33 @@ class Gui:
 
 
   # buttons click handlers
+  def read_drawing_handler(self):
+    self.completeDrawing = True
+    self.vert = [(19, 205), (-130, 216), (-135, 126), (-58, 160), (48, 120), \
+            (-52, 55), (-72, 107), (-183, 42), (-162, -47), (-110, 61), \
+            (-23, -76), (-182, -114), (-97, -173), (-59, -130), (164, -173), \
+            (139, 124), (55, -41), (111, 200), (181, 183), (67, 233)]
+    # self.vert = [(-146, 219), (-209, 92), (-109, 232), (56, 174)]
+    vert = self.vert
+
+    #check for sgments intersection
+    intersection = False
+    for i in range(2,len(vert)):
+      if polygon_intersection(vert[i], vert[i-1], vert[:i-1]):
+        intersection = True
+    if polygon_intersection(vert[0], vert[-1], vert):
+      intersection = True
+
+    if not intersection:
+      draw_poly(self.t, vert)
+    if intersection:
+      draw_poly(self.tErr, vert)
+      time.sleep(1)
+      self.tErr.clear()
+      completeDrawing = False
+
+
+
   def comDesen(self):
     self.stateLabel.set("Desenati poligonul (Click)")
     self.state = 1
@@ -120,18 +159,20 @@ class Gui:
       self.vert.clear()
       self.t.clear()
       self.tPV.clear()
+      self.trianglualtion_points_turtle.clear()
+      self.trianglualtion_lines_turtle.clear()
       self.viewPoint = (-1, -1)
       self.completeDrawing = False
 
   def comIncheie(self):
     ok = True
     vert = self.vert
+    print(vert)
     if len(vert) > 2:
       if not polygon_intersection(vert[0], vert[-1], vert):
         draw_line(self.t, vert[-1], vert[0])
         self.completeDrawing = True
         self.state = 0
-        print(vert)
       else:
         draw_line(self.tErr, vert[-1], vert[0])
         self.tErr.clear()
@@ -141,10 +182,11 @@ class Gui:
 
   def comTriang(self):
     print("Buggy: need to be tested")
-    triangles = triangulation(self.vert, self.tPV)
-    self.t.color('green')
-    for t in triangles:
-      draw_line(self.t, t[0], t[2])
+    self.triangles = triangulation(self.vert, self.trianglualtion_lines_turtle,\
+                                   self.trianglualtion_points_turtle)
+    # self.t.color('green')
+    # for t in triangles:
+    #   draw_line(self.t, t[0], t[2])
     self.stateLabel.set("Poligonul este triangulat")
     self.state = 0
 
