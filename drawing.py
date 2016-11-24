@@ -17,17 +17,19 @@ def draw_circle(turtle, A, size):
 
 
 def paint_visible_area(turtle, vert, viewPoint):
-  turtle.penup()
-  turtle.goto(viewPoint)
-  turtle.pendown()
-  turtle.begin_fill()
   
-  for v in vert:
+  
+  for i, v in vert:
+    turtle.penup()
+    turtle.goto(viewPoint)
+    turtle.pendown()
+    #turtle.begin_fill()
     turtle.goto(v)
+    turtle.goto((vert[(i+1)%n])
 
   turtle.goto(vert[0])
 
-  turtle.end_fill()
+  #turtle.end_fill()
   turtle.penup();
 
 

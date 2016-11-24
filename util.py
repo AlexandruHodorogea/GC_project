@@ -30,8 +30,8 @@ def collinear_points(A, B, C):
   return orientation_test(A, B, C) == 0
 
 
-# def length(A, B):
-#   return sqrt(pow((A[0] - B[0]), 2) + pow((A[1] - B[1]), 2))
+def length(A, B):
+ return math.sqrt(pow((A[0] - B[0]), 2) + pow((A[1] - B[1]), 2))
 
 
 # def get_angle(A, B, C):
