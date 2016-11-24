@@ -53,47 +53,62 @@ def preprocess(v):
   elif first_point == len(v) -1:
     nxt = 0
 
-  secound_point = nxt if v[nxt][1] > v[prev][1] else prev
+  secound_point = nxt if orientation_test(v[first_point], v[nxt], v[prev]) > 0 else prev
 
   print(first_point, ' ,', secound_point)
 
   if secound_point == 0 or secound_point == (len(v) -1):
-    (first_point, secound_point) = (secound_point, first_point)
-
-  if first_point < secound_point:
-    return v[first_point:] + v[:first_point]
+    if first_point > secound_point:
+      return v[first_point:] + v[:first_point]
+    else:
+      return list(reversed(v[:first_point + 1])) + list(reversed(v[first_point+1 : ]))
   else:
-    return list(reversed(v[:first_point + 1])) + list(reversed(v[first_point+1 : ]))
+    if first_point < secound_point:
+      return v[first_point:] + v[:first_point]
+    else:
+      return list(reversed(v[:first_point + 1])) + list(reversed(v[first_point+1 : ]))
 
 
 
 def triangulation(vert, turtle):
   aux_vert = preprocess(vert)
-  print(vert)
-  print(aux_vert)
+  # print(vert)
+  # print(aux_vert)
   queue = []
   triangles = []
   for i,p in enumerate(aux_vert):
     queue.append(p)
-    time.sleep(4)
-    print("ADDED %s from pos %s" % (p, i))
-    turtle.color("green")
-    draw_circle(turtle, p, 5)
-    print(queue)
+    # time.sleep(0.5)
+    # print("ADDED %s from pos %s" % (p, i))
+    # turtle.color("green")
+    # draw_circle(turtle, p, 5)
+    # print(queue)
     while len(queue) > 2 \
           and orientation_test(queue[-3],queue[-1],queue[-2]) < 0 \
-          and not polygon_intersection(queue[-3],queue[-1],aux_vert):
+          and not polygon_intersection(queue[-3],queue[-1],aux_vert) \
+          and not points_inside_triangle((queue[-3],queue[-1],queue[-2]), vert):
       triangles.append((queue[-3],queue[-2],queue[-1]))
-      print("REVOVED %s positon %s" % (str(queue[-2]), str(aux_vert.index(queue[-2]))))
-      turtle.color("blue")
-      draw_line(turtle, queue[-3], queue[-1])
-      turtle.color("red")
-      draw_circle(turtle, queue[-2], 5)
+      # print("REVOVED %s positon %s" % (str(queue[-2]), str(aux_vert.index(queue[-2]))))
+      # turtle.color("blue")
+      # draw_line(turtle, queue[-3], queue[-1])
+      # turtle.color("red")
+      # draw_circle(turtle, queue[-2], 5)
       del queue[-2]
-      print(queue)
-  print(len(triangles))
-  print(len(vert))
+  #     print(queue)
+  # print(len(triangles))
+  # print(len(vert))
   return triangles
+
+def points_inside_triangle(triangle, points):
+  for p in points:
+    global_dir = orientation_test(triangle[0], triangle[1], p)
+    if global_dir != orientation_test(triangle[1], triangle[2], p):
+      continue
+    if global_dir != orientation_test(triangle[2], triangle[0], p):
+      continue
+    return True
+  return False
+
 
 def point_inside_polygon(point, vert):
   print("Not implemented yet")

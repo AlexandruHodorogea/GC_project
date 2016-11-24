@@ -34,7 +34,7 @@ class Gui:
 
     # initialize turtles
     self.t = turtle.RawTurtle(self.canvas)
-    self.t.speed(2)
+    self.t.speed(4)
     self.t.hideturtle()
     self.tPV = turtle.RawTurtle(self.canvas)
     self.tPV.color("#468499") #B5CDD6 suprafata vizibila
@@ -49,21 +49,21 @@ class Gui:
     self.canvas.bind("<Button>", self.onClick)
 
     # initialize buttons 
-    butDesen = tkinter.Button(self.frame, \
+    clear_screen_button = tkinter.Button(self.frame, \
       text = "Clear Drawing Area", command = self.comDesen)
-    butDesen.pack(fill='x')
+    clear_screen_button.pack(fill='x')
 
-    butIncheie = tkinter.Button(self.frame, \
+    close_poly_button = tkinter.Button(self.frame, \
       text = "Close Polygon", command = self.comIncheie)
-    butIncheie.pack(fill='x')
+    close_poly_button.pack(fill='x')
     
-    butTriang = tkinter.Button(self.frame, \
+    triangulation_button = tkinter.Button(self.frame, \
       text = "Triangulation", command = self.comTriang)
-    butTriang.pack(fill='x')
+    triangulation_button.pack(fill='x')
     
-    butArie = tkinter.Button(self.frame, \
+    visible_aria_button = tkinter.Button(self.frame, \
       text = "Check Visible Area (Set a Point)", command = self.comArie)
-    butArie.pack(fill='x')
+    visible_aria_button.pack(fill='x')
 
     self.root.mainloop()
 
@@ -140,7 +140,7 @@ class Gui:
       print("You need at least 3 points!")
 
   def comTriang(self):
-    print("Not implemented!")
+    print("Buggy: need to be tested")
     triangles = triangulation(self.vert, self.tPV)
     self.t.color('green')
     for t in triangles:
