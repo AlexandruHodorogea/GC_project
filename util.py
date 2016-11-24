@@ -26,19 +26,17 @@ def polygon_intersection(A, B, vert):
   return False
 
 
-def colinear_points(A, B, C):
-  AB = (vert[-1][0] - vert[-2][0], vert[-1][1] - vert[-2][1])
-  BC = (currentPoint[0] - vert[-1][0], currentPoint[1] - vert[-1][1])
-  # check if last 3 points are collinear
-  if AB[0]*BC[1] == AB[1]*BC[0]:
-    pass
-
-def length(A, B):
-  return sqrt(pow((A[0] - B[0]), 2) + pow((A[1] - B[1]), 2))
+def collinear_points(A, B, C):
+  return orientation_test(A, B, C) == 0
 
 
-def get_angle(A, B, C):
-  return arccos((pow(length(A, B), 2) + pow(length(C, B),2) - pow(length(A, B), 2)) / 2 * length(A, B) * length(C, B)) / 3.14 * 180
+# def length(A, B):
+#   return sqrt(pow((A[0] - B[0]), 2) + pow((A[1] - B[1]), 2))
+
+
+# def get_angle(A, B, C):
+#   return arccos((pow(length(A, B), 2) + pow(length(C, B),2) - pow(length(A, B), 2)) \
+#                 / 2 * length(A, B) * length(C, B)) / 3.14 * 180
 
 def preprocess(v):
   first_point = 0
@@ -52,22 +50,29 @@ def preprocess(v):
     prev = len(v) - 1
   elif first_point == len(v) -1:
     nxt = 0
-
-  secound_point = nxt if v[nxt][1] > v[prev][1] else prev
-
+  print(v)
+  print(prev)
+  print(nxt)
+  print("current %s, next %s, prev %s" % (str(v[first_point]), str(v[nxt]), str(v[prev])))
+  secound_point = nxt if orientation_test(v[first_point], v[nxt], v[prev]) > 0 else prev
+  print("preprocess_orientation_test "+ str(orientation_test(v[first_point], v[nxt], v[prev])))
   print(first_point, ' ,', secound_point)
+  print("vert len ", str(len(v)))
 
-  if secound_point == 0 or secound_point == (len(v) -1):
-    (first_point, secound_point) = (secound_point, first_point)
-
-  if first_point < secound_point:
-    return v[first_point:] + v[:first_point]
+  if abs(first_point - secound_point) > 1:
+    if first_point > secound_point:
+      return v[first_point:] + v[:first_point]
+    else:
+      return list(reversed(v[:first_point + 1])) + list(reversed(v[first_point+1 : ]))
   else:
-    return list(reversed(v[:first_point + 1])) + list(reversed(v[first_point+1 : ]))
+    if first_point < secound_point:
+      return v[first_point:] + v[:first_point]
+    else:
+      return list(reversed(v[:first_point + 1])) + list(reversed(v[first_point+1 : ]))
 
 
 
-def triangulation(vert, turtle):
+def triangulation(vert, lines_drawer, proints_drawer):
   aux_vert = preprocess(vert)
   print(vert)
   print(aux_vert)
@@ -75,39 +80,34 @@ def triangulation(vert, turtle):
   triangles = []
   for i,p in enumerate(aux_vert):
     queue.append(p)
-    time.sleep(4)
-    print("ADDED %s from pos %s" % (p, i))
-    turtle.color("green")
-    draw_circle(turtle, p, 5)
-    print(queue)
+    # time.sleep(0.5)
+    # print("ADDED %s from pos %s" % (p, i))
+    # print(queue)
+
+    proints_drawer.color("blue")
+    draw_circle(proints_drawer, p, 5)
+
+    
     while len(queue) > 2 \
           and orientation_test(queue[-3],queue[-1],queue[-2]) < 0 \
-          and not polygon_intersection(queue[-3],queue[-1],aux_vert):
+          and not polygon_intersection(queue[-3],queue[-1],aux_vert) \
+          and not points_inside_triangle((queue[-3],queue[-1],queue[-2]), vert):
       triangles.append((queue[-3],queue[-2],queue[-1]))
-      print("REVOVED %s positon %s" % (str(queue[-2]), str(aux_vert.index(queue[-2]))))
-      turtle.color("blue")
-      draw_line(turtle, queue[-3], queue[-1])
-      turtle.color("red")
-      draw_circle(turtle, queue[-2], 5)
+      # print("REVOVED %s positon %s" % (str(queue[-2]), str(aux_vert.index(queue[-2]))))
+
+      draw_line(lines_drawer, queue[-3], queue[-1])
+      proints_drawer.color("red")
+      draw_circle(proints_drawer, queue[-2], 5)
       del queue[-2]
-      print(queue)
-  print(len(triangles))
-  print(len(vert))
+      # print(queue)
+  #   if len(queue) > 2:
+  #     print('orientation, ' + str(orientation_test(queue[-3],queue[-1],queue[-2]) < 0))
+  #     print('ply_itersection, ' + str(polygon_intersection(queue[-3],queue[-1],aux_vert))) 
+  #     print('points insiide, ' +str(points_inside_triangle((queue[-3],queue[-1],queue[-2]), vert)))
+  # print(len(triangles))
+  # print(len(vert))
+  proints_drawer.clear()
   return triangles
-
-def point_inside_polygon(point, vert):
-  print("Not implemented yet")
-  return True   # None
-  global_dir = None
-  for i in range(len(vert) - 1):
-    if global_dir == None:
-      global_dir = orientation_test(vert[i], vert[i + 1], point)
-    elif global_dir == -orientation_test(vert[i], vert[i + 1], point):
-      return False
-  if global_dir == -orientation_test(vert[-1], vert[0], point):
-    return False
-  return True
-
 
 
 def point_of_intersection(A, B, C, D):
@@ -172,5 +172,20 @@ def visible_area(vertices, viewPoint):
 
   return result
 
+    
+def points_inside_triangle(triangle, points):
+  for p in points:
+    global_dir = orientation_test(triangle[0], triangle[1], p)
+    if global_dir != orientation_test(triangle[1], triangle[2], p):
+      continue
+    if global_dir != orientation_test(triangle[2], triangle[0], p):
+      continue
+    return True
+  return False
 
-  
+
+def point_inside_polygon(triangles, point):
+  for t in triangles:
+    if points_inside_triangle(t, [point]):
+      return True
+  return False

@@ -29,3 +29,9 @@ def paint_visible_area(turtle, vert, viewPoint):
 
   turtle.end_fill()
   turtle.penup();
+
+
+def draw_poly(turtle, vert):
+  for i in range(len(vert) - 1):
+    draw_line(turtle, vert[i], vert[i + 1])
+  draw_line(turtle, vert[len(vert) - 1], vert[0])
