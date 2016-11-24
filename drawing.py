@@ -14,3 +14,18 @@ def draw_circle(turtle, A, size):
   turtle.circle(size)
   turtle.end_fill()
   turtle.penup()
+
+
+def paint_visible_area(turtle, vert, viewPoint):
+  turtle.penup()
+  turtle.goto(viewPoint)
+  turtle.pendown()
+  turtle.begin_fill()
+  
+  for v in vert:
+    turtle.goto(v)
+
+  turtle.goto(vert[0])
+
+  turtle.end_fill()
+  turtle.penup();

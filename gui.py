@@ -1,9 +1,8 @@
 import tkinter
 import turtle
 import time
-from util import orientation_test, intersection, triangulation, \
-                 point_inside_polygon, polygon_intersection
-from drawing import draw_line, draw_circle
+from util import *
+from drawing import *
 
 class Gui:
   # store state of the window
@@ -34,16 +33,20 @@ class Gui:
 
     # initialize turtles
     self.t = turtle.RawTurtle(self.canvas)
-    self.t.speed(2)
+    self.t.speed(8)
     self.t.hideturtle()
     self.tPV = turtle.RawTurtle(self.canvas)
-    self.tPV.color("#468499") #B5CDD6 suprafata vizibila
+    self.tPV.color("#468499")
     self.tPV.hideturtle()
-    self.tPV.speed(10)
+    self.tPV.speed(8)
     self.tErr = turtle.RawTurtle(self.canvas)
     self.tErr.color("red")
     self.tErr.hideturtle()
     self.tErr.speed(5)
+    self.tVis = turtle.RawTurtle(self.canvas)
+    self.tVis.color("#B5CDD6")
+    self.tVis.hideturtle()
+    self.tVis.speed(1)
 
     # set on click event
     self.canvas.bind("<Button>", self.onClick)
@@ -95,12 +98,16 @@ class Gui:
           print("Intersection!")
           draw_line(self.tErr,vert[-1], currentPoint)
           self.tErr.clear()
+          self.tVis.clear()
         
     if self.state == 3:
       tPV.clear()
+      self.tVis.clear()
       draw_circle(tPV, currentPoint, 2)
       if point_inside_polygon(currentPoint, vert):
-        print("Point is inside Polygon")
+        self.viewPoint = (ev.x - self.canvas.winfo_width()//2 - 1, self.canvas.winfo_height()//2 - ev.y - 1)
+        paint_visible_area(self.tVis, visible_area(vert, self.viewPoint), self.viewPoint)
+        print("Point is inside Polygon, hopefully")
       else:
         print("Point is not inside Polygon")
 
@@ -118,6 +125,7 @@ class Gui:
                                         "Doriti sa stergeti desenul actual?")
     if answer == "yes":
       self.vert.clear()
+      self.tVis.clear()
       self.t.clear()
       self.tPV.clear()
       self.viewPoint = (-1, -1)

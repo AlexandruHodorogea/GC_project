@@ -1,6 +1,6 @@
 import math
 import time
-from drawing import draw_circle, draw_line
+from drawing import *
 
 def orientation_test(p1, p2, r):
   direction = p2[0] * r[1] + p1[0] * p2[1] + p1[1] * r[0] - \
@@ -97,7 +97,7 @@ def triangulation(vert, turtle):
 
 def point_inside_polygon(point, vert):
   print("Not implemented yet")
-  return None
+  return True   # None
   global_dir = None
   for i in range(len(vert) - 1):
     if global_dir == None:
@@ -107,3 +107,70 @@ def point_inside_polygon(point, vert):
   if global_dir == -orientation_test(vert[-1], vert[0], point):
     return False
   return True
+
+
+
+def point_of_intersection(A, B, C, D):
+  aAB = A[1] - B[1]
+  bAB = B[0] - A[0]
+  cAB = A[0]*B[1] - A[1]*B[0]
+
+  aCD = C[1] - D[1]
+  bCD = D[0] - C[0]
+  cCD = C[0]*D[1] - C[1]*D[0]
+
+  # test if AB and CD are parallel
+  if aAB*bCD - bAB*aCD != 0:
+    interX = (-cAB*bCD - bAB*-cCD)/(aAB*bCD - bAB*aCD)
+    interY = (aAB*-cCD - (-cAB)*aCD)/(aAB*bCD - bAB*aCD)
+    return(interX, interY)
+  else:
+    return None
+
+def raport(A, B, C):
+
+  AB = (B[0] - A[0], B[1] - A[1])
+  BC = (C[0] - B[0], C[1] - B[1])
+  
+  if BC[0] != 0: #A[1] != B[1]:
+    return AB[0]/BC[0]
+  elif A[0] != B[0]:
+    return AB[1]/BC[1]    
+
+
+def visible_area(vertices, viewPoint):
+  vert = vertices[:]
+  vert.append(vert[0])
+  result = []
+  M = viewPoint    # M = view point
+
+  for V in vert:
+    # intermediar list
+    interList = []
+    interList.append(V)
+    
+    for i in range(1, len(vert)):
+      if vert[i] == V or vert[i-1] == V:
+        continue
+      
+      I = point_of_intersection(M, V, vert[i-1], vert[i])
+
+      if I != None and raport(vert[i-1], I, vert[i]) > 0:
+        if raport(M, V, I) > 0:
+          if len(interList) == 1:
+            interList.append(I)
+          elif len(interList) > 1 and length(interList[0], I) < length(interList[0], interList[1]):
+            interList.pop()
+            interList.append(I)
+        elif raport(M, I, V) > 0:
+          interList[:] = []
+    
+
+    # TODO: keep only the vertex and closest I to it in interList bfore extending
+    result.extend(interList)
+    result.sort(key=lambda vertex: (math.atan2(vertex[1], vertex[0]), math.sqrt(vertex[0]**2 + vertex[1]**2)))
+
+  return result
+
+
+  
