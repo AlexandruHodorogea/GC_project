@@ -33,10 +33,11 @@ class Gui:
 
     # initialize turtles
     self.t = turtle.RawTurtle(self.canvas)
-    self.t.speed(8)
+    self.t.speed(0)
+    self.t.color()
     self.t.hideturtle()
     self.tPV = turtle.RawTurtle(self.canvas)
-    self.tPV.color("#468499")
+    self.tPV.color("darkred") # #468499
     self.tPV.hideturtle()
     self.tPV.speed(20)
     self.tErr = turtle.RawTurtle(self.canvas)
@@ -44,16 +45,16 @@ class Gui:
     self.tErr.hideturtle()
     self.tErr.speed(10)
     self.trianglualtion_lines_turtle = turtle.RawTurtle(self.canvas)
-    self.trianglualtion_lines_turtle.color("green")
+    self.trianglualtion_lines_turtle.color("lightblue")
     self.trianglualtion_lines_turtle.hideturtle()
-    self.trianglualtion_lines_turtle.speed(5)
+    self.trianglualtion_lines_turtle.speed(0)
     self.trianglualtion_points_turtle = turtle.RawTurtle(self.canvas)
     self.trianglualtion_points_turtle.hideturtle()
-    self.trianglualtion_points_turtle.speed(20)
+    self.trianglualtion_points_turtle.speed(0)
     self.tVis = turtle.RawTurtle(self.canvas)
-    self.tVis.color("#B5CDD6")
+    self.tVis.color("darkred", "lightgreen") # #"#B5CDD6")
     self.tVis.hideturtle()
-    self.tVis.speed(1)
+    self.tVis.speed(0)
 
     # set on click event
     self.canvas.bind("<Button>", self.onClick)
@@ -117,9 +118,9 @@ class Gui:
       draw_circle(tPV, currentPoint, 2)
 
       if point_inside_polygon(self.triangles, currentPoint):
-        self.viewPoint = (ev.x - self.canvas.winfo_width()//2 - 1, self.canvas.winfo_height()//2 - ev.y - 1)
-        paint_visible_area(self.tVis, visible_area(vert, self.viewPoint), self.viewPoint)
-        print("Point is inside Polygon, hopefully")
+        self.viewPoint = (ev.x - self.canvas.winfo_width()//2, self.canvas.winfo_height()//2 - ev.y - 1)
+        paint_visible_area(self.tVis, self.tPV, visible_area(vert, self.triangles, self.viewPoint), self.viewPoint, self.triangles)
+        print("Point is inside Polygon")
 
 
   def getCurrentPoint(self, ev):

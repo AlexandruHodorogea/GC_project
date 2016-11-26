@@ -26,8 +26,22 @@ def polygon_intersection(A, B, vert):
   return False
 
 
+def orientation_test_Err(p1, p2, r):
+  direction = p2[0] * r[1] + p1[0] * p2[1] + p1[1] * r[0] - \
+    p1[1] * p2[0] - p2[1] * r[0] - p1[0] * r[1]
+
+  if direction > 0.0001:
+    return 1
+  if direction < -0.0001:
+    return -1
+  else:
+    return 0
+
 def collinear_points(A, B, C):
   return orientation_test(A, B, C) == 0
+
+def collinear_points_Err(A, B, C):
+  return orientation_test_Err(A, B, C) == 0
 
 
 def length(A, B):
@@ -84,7 +98,7 @@ def triangulation(vert, lines_drawer, proints_drawer):
     # print("ADDED %s from pos %s" % (p, i))
     # print(queue)
 
-    proints_drawer.color("blue")
+    proints_drawer.color("green")
     draw_circle(proints_drawer, p, 5)
 
     
@@ -120,7 +134,7 @@ def point_of_intersection(A, B, C, D):
   cCD = C[0]*D[1] - C[1]*D[0]
 
   # test if AB and CD are parallel
-  if aAB*bCD - bAB*aCD != 0:
+  if aAB*bCD - bAB*aCD != 0: #< -0.0001 or aAB*bCD - bAB*aCD > 0.0001:
     interX = (-cAB*bCD - bAB*-cCD)/(aAB*bCD - bAB*aCD)
     interY = (aAB*-cCD - (-cAB)*aCD)/(aAB*bCD - bAB*aCD)
     return(interX, interY)
@@ -128,6 +142,9 @@ def point_of_intersection(A, B, C, D):
     return None
 
 def raport(A, B, C):
+
+  if B[0] == C[0] and B[1] == C[1]:
+    return None
 
   AB = (B[0] - A[0], B[1] - A[1])
   BC = (C[0] - B[0], C[1] - B[1])
@@ -137,13 +154,51 @@ def raport(A, B, C):
   elif A[0] != B[0]:
     return AB[1]/BC[1]    
 
+def on_edge(AB, X):
+  if collinear_points_Err(AB[0], AB[1], X):
+    if AB[0][0] != AB[1][0] and (AB[0][0] <= X[0] <= AB[1][0] or AB[0][0] >= X[0] >= AB[1][0]):
+      return True
+    elif AB[0][0] == AB[1][0] and (AB[0][1] <= X[1] <= AB[1][1] or AB[0][1] >= X[1] >= AB[1][1]):
+      return True
+  return False
 
-def visible_area(vertices, viewPoint):
+def same_edge(vert, A, B):
+  n = len(vert)
+  for i in range(0, n):
+    MN = (vert[i%n], vert[(i+1)%n])
+    if on_edge(MN, A) and on_edge(MN, B):
+      return True
+  return False
+
+
+def correct_order(vert, allVertices, vP):
+  vert.sort(key=lambda vertex: (math.atan2(vertex[1] - vP[1], vertex[0] - vP[0]), +(math.sqrt((vertex[0]-vP[0])**2 + (vertex[1]-vP[1])**2))))
+  
+  for i in range(0, len(vert)):
+    A = vert[i%len(vert)]
+    B = vert[(i+1)%len(vert)]
+    C = vert[(i+2)%len(vert)]
+    D = vert[(i-1)%len(vert)]
+
+    if collinear_points_Err(vP, A, B):
+
+      if B in allVertices:
+        (A, B) = (B, A)
+        print("A <-> B")
+        (vert[i%len(vert)], vert[(i+1)%len(vert)]) = (vert[(i+1)%len(vert)], vert[i%len(vert)])
+
+      if A in allVertices and orientation_test(vP, A, allVertices[allVertices.index(A)-1]) > 0:
+        (vert[i%len(vert)], vert[(i+1)%len(vert)]) = (vert[(i+1)%len(vert)], vert[i%len(vert)])
+
+
+  return vert
+
+def visible_area(vertices, triangles, viewPoint):
   vert = vertices[:]
   vert.append(vert[0])
   result = []
   M = viewPoint    # M = view point
-
+  
   for V in vert:
     # intermediar list
     interList = []
@@ -155,21 +210,34 @@ def visible_area(vertices, viewPoint):
       
       I = point_of_intersection(M, V, vert[i-1], vert[i])
 
-      if I != None and raport(vert[i-1], I, vert[i]) > 0:
-        if raport(M, V, I) > 0:
+      if I and raport(vert[i-1], I, vert[i]) and raport(vert[i-1], I, vert[i]) > 0:   # daca se intersecteaza in interior
+        if raport(M, V, I) and raport(M, V, I) > 0:                                                       # daca ordinea este pe M-V-I
           if len(interList) == 1:
             interList.append(I)
           elif len(interList) > 1 and length(interList[0], I) < length(interList[0], interList[1]):
             interList.pop()
             interList.append(I)
-        elif raport(M, I, V) > 0:
+        elif raport(M, I, V) and raport(M, I, V) > 0:
           interList[:] = []
+          continue
     
+    if len(interList) > 1 and not point_inside_polygon(triangles, ((V[0] + interList[1][0])/2, (V[1] + interList[1][1])/2)):
+      interList[:] = interList[0:1]
 
-    # TODO: keep only the vertex and closest I to it in interList bfore extending
     result.extend(interList)
-    result.sort(key=lambda vertex: (math.atan2(vertex[1], vertex[0]), math.sqrt(vertex[0]**2 + vertex[1]**2)))
+        
+  #result.sort(key=lambda vertex: math.atan2(vertex[1] - viewPoint[1], vertex[0] - viewPoint[0]))
 
+  i = 0
+  while i < len(result)-1:
+    if result[i] == result[i+1]:
+      result.pop(i)
+    else:
+      i = i+1
+  
+  result = correct_order(result, vertices, viewPoint)
+
+  print(result)
   return result
 
     

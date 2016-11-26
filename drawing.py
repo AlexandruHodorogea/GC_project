@@ -1,3 +1,6 @@
+import util
+#from util import *
+
 #drawing functions
 def draw_line(turtle, A, B):
 	turtle.penup()
@@ -8,7 +11,7 @@ def draw_line(turtle, A, B):
 
 def draw_circle(turtle, A, size):
   turtle.penup()
-  turtle.goto(A[0] - size/2, A[1] - size/2)
+  turtle.goto(A[0], A[1] - size)
   turtle.pendown()
   turtle.begin_fill()
   turtle.circle(size)
@@ -16,21 +19,28 @@ def draw_circle(turtle, A, size):
   turtle.penup()
 
 
-def paint_visible_area(turtle, vert, viewPoint):
+def paint_visible_area(turtle, tPV, vert, viewPoint, triangles):
+  turtle.speed(6)
+  #turtle.color("red", "")
+  turtle.penup()
+  turtle.goto(viewPoint)
   
-  
-  for i, v in vert:
-    turtle.penup()
-    turtle.goto(viewPoint)
+  for i, v in enumerate(vert):
     turtle.pendown()
-    #turtle.begin_fill()
+    turtle.begin_fill()
     turtle.goto(v)
-    turtle.goto((vert[(i+1)%n])
+    turtle.goto(vert[(i+1)%len(vert)])
+    turtle.goto(viewPoint)
+    turtle.end_fill()
+    turtle.penup()
+    tPV.begin_fill()
+    tPV.circle(2)
+    tPV.end_fill()
+  
+  #turtle.goto(vert[0])
 
-  turtle.goto(vert[0])
-
-  #turtle.end_fill()
-  turtle.penup();
+  
+  
 
 
 def draw_poly(turtle, vert):
