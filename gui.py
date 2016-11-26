@@ -26,7 +26,7 @@ class Gui:
     tkinter.Label(self.frame, textvariable=self.stateLabel, \
                   bg='grey', fg='white').pack(fill='x')
 
-    self.canvas = tkinter.Canvas(self.frame, width=500, height=500)
+    self.canvas = tkinter.Canvas(self.frame, width=width, height=height)
     self.canvas.pack()
 
     self.frame.pack(fill='both', expand=True)
@@ -87,7 +87,10 @@ class Gui:
     vert = self.vert
     tPV = self.tPV
 
-    currentPoint = self.getCurrentPoint(ev)
+    currentPoint = self.get_current_point(ev)
+    if currentPoint in vert:
+      print("You can't add the same point 2 times")
+      return
 
     # add points to drawing
     if self.state == 1 and not self.completeDrawing:
@@ -101,16 +104,18 @@ class Gui:
         if not polygon_intersection(currentPoint, vert[-1], vert):
           draw_line(self.t, vert[-1], currentPoint)
           # check if last 3 points are collinear
-          # TODO: IMPORVE THIS WITH DISTANCES
           if len(vert) > 2 and collinear_points(vert[-2], vert[-1], currentPoint):
-            # remove last point
-            del vert[-1]
+            if raport(vert[-2], currentPoint, vert[-1]) < 0:
+              print("Intersection!")
+              draw_line(self.tErr,vert[-1], currentPoint)
+              self.tErr.clear()
+            else:
+              del vert[-1]
           vert.append(currentPoint)
         else:
           print("Intersection!")
           draw_line(self.tErr,vert[-1], currentPoint)
           self.tErr.clear()
-          self.tVis.clear()
         
     if self.state == 3:
       tPV.clear()
@@ -123,21 +128,22 @@ class Gui:
         print("Point is inside Polygon")
 
 
-  def getCurrentPoint(self, ev):
+  def get_current_point(self, ev):
     return (ev.x - self.canvas.winfo_width()//2, \
             self.canvas.winfo_height()//2 - ev.y)
 
 
   # buttons click handlers
   def read_drawing_handler(self):
+    if self.vert:
+      self.comDesen()
     self.completeDrawing = True
-    self.vert = [(19, 205), (-130, 216), (-135, 126), (-58, 160), (48, 120), \
-            (-52, 55), (-72, 107), (-183, 42), (-162, -47), (-110, 61), \
-            (-23, -76), (-182, -114), (-97, -173), (-59, -130), (164, -173), \
-            (139, 124), (55, -41), (111, 200), (181, 183), (67, 233)]
-    # self.vert = [(-146, 219), (-209, 92), (-109, 232), (56, 174)]
+    with open("input.in", "r") as f:
+      for line in f:
+        (x, y) = tuple(line.split())
+        self.vert.append((int(x),int(y)))
     vert = self.vert
-
+    
     #check for sgments intersection
     intersection = False
     for i in range(2,len(vert)):
@@ -155,7 +161,6 @@ class Gui:
       completeDrawing = False
 
 
-
   def comDesen(self):
     self.stateLabel.set("Desenati poligonul (Click)")
     self.state = 1
@@ -170,6 +175,7 @@ class Gui:
       self.trianglualtion_lines_turtle.clear()
       self.viewPoint = (-1, -1)
       self.completeDrawing = False
+
 
   def comIncheie(self):
     ok = True
@@ -187,15 +193,14 @@ class Gui:
     else:
       print("You need at least 3 points!")
 
+
   def comTriang(self):
     print("Buggy: need to be tested")
     self.triangles = triangulation(self.vert, self.trianglualtion_lines_turtle,\
                                    self.trianglualtion_points_turtle)
-    # self.t.color('green')
-    # for t in triangles:
-    #   draw_line(self.t, t[0], t[2])
     self.stateLabel.set("Poligonul este triangulat")
     self.state = 0
+
 
   def comArie(self):
     print("Not implemented!")
