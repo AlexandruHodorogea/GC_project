@@ -151,7 +151,8 @@ def raport(A, B, C):
   
   if BC[0] != 0: #A[1] != B[1]:
     return AB[0]/BC[0]
-  elif A[0] != B[0]:
+  else:
+    print("y = 0:", AB[1]/BC[1])
     return AB[1]/BC[1]    
 
 def on_edge(AB, X):
