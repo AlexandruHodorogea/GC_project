@@ -14,7 +14,7 @@ def orientation_test(p1, p2, r):
     return 0
 
 def intersection(A, B, C, D):
-  if(orientation_test(A, B, C)*orientation_test(A, B, D) < 0 and orientation_test(C, D, A)*orientation_test(C, D, B) < 0):
+  if(orientation_test(A, B, C)*orientation_test(A, B, D) < 0 and orientation_test(C, D, A)*orientation_test(C, D, B) <= 0):
     return True
   else:
     return False
@@ -175,6 +175,14 @@ def same_edge(vert, A, B):
 def correct_order(vert, allVertices, vP):
   vert.sort(key=lambda vertex: (math.atan2(vertex[1] - vP[1], vertex[0] - vP[0]), +(math.sqrt((vertex[0]-vP[0])**2 + (vertex[1]-vP[1])**2))))
   
+  i = 0
+  while i < len(vert)-1:
+    if vert[i] == vert[i+1]:
+      vert.pop(i)
+    else:
+      i = i+1
+  
+
   for i in range(0, len(vert)):
     A = vert[i%len(vert)]
     B = vert[(i+1)%len(vert)]
@@ -229,12 +237,6 @@ def visible_area(vertices, triangles, viewPoint):
         
   #result.sort(key=lambda vertex: math.atan2(vertex[1] - viewPoint[1], vertex[0] - viewPoint[0]))
 
-  i = 0
-  while i < len(result)-1:
-    if result[i] == result[i+1]:
-      result.pop(i)
-    else:
-      i = i+1
   
   result = correct_order(result, vertices, viewPoint)
 
