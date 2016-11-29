@@ -109,7 +109,8 @@ def triangulation(vert, lines_drawer, proints_drawer):
       triangles.append((queue[-3],queue[-2],queue[-1]))
       # print("REVOVED %s positon %s" % (str(queue[-2]), str(aux_vert.index(queue[-2]))))
 
-      draw_line(lines_drawer, queue[-3], queue[-1])
+      if i < len(aux_vert):
+        draw_line(lines_drawer, queue[-3], queue[-1])
       proints_drawer.color("red")
       draw_circle(proints_drawer, queue[-2], 5)
       del queue[-2]
@@ -219,6 +220,10 @@ def visible_area(vertices, triangles, viewPoint):
       
       I = point_of_intersection(M, V, vert[i-1], vert[i])
 
+      if I and I in vert and raport(M, I, V) and raport(M, I, V) > 0:
+        interList[:] = []
+        continue
+
       if I and raport(vert[i-1], I, vert[i]) and raport(vert[i-1], I, vert[i]) > 0:   # daca se intersecteaza in interior
         if raport(M, V, I) and raport(M, V, I) > 0:                                                       # daca ordinea este pe M-V-I
           if len(interList) == 1:
@@ -229,7 +234,9 @@ def visible_area(vertices, triangles, viewPoint):
         elif raport(M, I, V) and raport(M, I, V) > 0:
           interList[:] = []
           continue
-    
+      
+
+
     if len(interList) > 1 and not point_inside_polygon(triangles, ((V[0] + interList[1][0])/2, (V[1] + interList[1][1])/2)):
       interList[:] = interList[0:1]
 
@@ -257,8 +264,24 @@ def points_inside_triangle(triangle, points):
   return False
 
 
+def points_belong_triangle(triangle, points):
+  for p in points:
+    global_dir = orientation_test(triangle[0], triangle[1], p)
+
+    if on_edge((triangle[0], triangle[1]), p) or on_edge((triangle[1], triangle[2]), p) or on_edge((triangle[2], triangle[0]), p):
+      return True
+
+    if global_dir != orientation_test(triangle[1], triangle[2], p):# and orientation_test(triangle[1], triangle[2], p) != 0:
+      continue
+    if global_dir != orientation_test(triangle[2], triangle[0], p):# and orientation_test(triangle[2], triangle[0], p) != 0:
+      continue
+    return True
+  
+  return False
+
+
 def point_inside_polygon(triangles, point):
   for t in triangles:
-    if points_inside_triangle(t, [point]):
+    if points_belong_triangle(t, [point]):
       return True
   return False
