@@ -14,14 +14,14 @@ def orientation_test(p1, p2, r):
     return 0
 
 def intersection(A, B, C, D):
-  if(orientation_test(A, B, C)*orientation_test(A, B, D) < 0 and orientation_test(C, D, A)*orientation_test(C, D, B) <= 0):
+  if(orientation_test(A, B, C)*orientation_test(A, B, D) <= 0 and orientation_test(C, D, A)*orientation_test(C, D, B) <= 0):
     return True
   else:
     return False
 
 def polygon_intersection(A, B, vert):
   for i in range(len(vert) - 1):
-    if intersection(A, B, vert[i], vert[i+1]):
+    if intersection(A, B, vert[i], vert[i+1]) and vert[i] != A and vert[i+1] != A and vert[i] != B and vert[i+1] != B:
       return True
   return False
 
@@ -88,6 +88,7 @@ def preprocess(v):
 
 def triangulation(vert, lines_drawer, proints_drawer):
   aux_vert = preprocess(vert)
+
   print(vert)
   print(aux_vert)
   queue = []
@@ -101,7 +102,6 @@ def triangulation(vert, lines_drawer, proints_drawer):
     proints_drawer.color("green")
     draw_circle(proints_drawer, p, 5)
 
-    
     while len(queue) > 2 \
           and orientation_test(queue[-3],queue[-1],queue[-2]) < 0 \
           and not polygon_intersection(queue[-3],queue[-1],aux_vert) \
@@ -113,6 +113,7 @@ def triangulation(vert, lines_drawer, proints_drawer):
       proints_drawer.color("red")
       draw_circle(proints_drawer, queue[-2], 5)
       del queue[-2]
+
       # print(queue)
   #   if len(queue) > 2:
   #     print('orientation, ' + str(orientation_test(queue[-3],queue[-1],queue[-2]) < 0))
@@ -152,7 +153,6 @@ def raport(A, B, C):
   if BC[0] != 0: #A[1] != B[1]:
     return AB[0]/BC[0]
   else:
-    print("y = 0:", AB[1]/BC[1])
     return AB[1]/BC[1]    
 
 def on_edge(AB, X):
@@ -196,7 +196,7 @@ def correct_order(vert, allVertices, vP):
         print("A <-> B")
         (vert[i%len(vert)], vert[(i+1)%len(vert)]) = (vert[(i+1)%len(vert)], vert[i%len(vert)])
 
-      if A in allVertices and orientation_test(vP, A, allVertices[allVertices.index(A)-1]) > 0:
+      if A in allVertices and not B in allVertices and orientation_test(vP, A, allVertices[allVertices.index(A)-1]) > 0:
         (vert[i%len(vert)], vert[(i+1)%len(vert)]) = (vert[(i+1)%len(vert)], vert[i%len(vert)])
 
 
@@ -243,15 +243,17 @@ def visible_area(vertices, triangles, viewPoint):
   print(result)
   return result
 
-    
+
 def points_inside_triangle(triangle, points):
   for p in points:
     global_dir = orientation_test(triangle[0], triangle[1], p)
-    if global_dir != orientation_test(triangle[1], triangle[2], p):
+
+    if global_dir != orientation_test(triangle[1], triangle[2], p):# and orientation_test(triangle[1], triangle[2], p) != 0:
       continue
-    if global_dir != orientation_test(triangle[2], triangle[0], p):
+    if global_dir != orientation_test(triangle[2], triangle[0], p):# and orientation_test(triangle[2], triangle[0], p) != 0:
       continue
     return True
+  
   return False
 
 

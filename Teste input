@@ -1,3 +1,58 @@
+# test if triangulation intersect vertex
+100 0
+0 100
+-100 0
+-100 -100
+0 0
+100 -100
+
+# test if polygon intersect vertex
+0 0
+100 100
+-200 0
+50 -50
+50 50
+20 0
+
+# test if polygon intersect vertex on vertical edge
+10 -20
+0 0
+100 -100
+100 100
+0 100
+0 -100
+
+# test if polygon intersect vertex on horizontal edge
+-20 10
+0 0
+-100 100
+100 100
+100 0
+-100 0
+
+# Classic input
+19 205
+-130 216
+-135 126
+-58 160
+48 120
+-52 55
+-72 107
+-183 42
+-162 -47
+-110 61
+-23 -76
+-182 -114
+-97 -173
+-59 -130
+164 -173
+139 124
+55 -41
+111 200
+181 183
+67 233
+
+# Default
 -18 101
 -2 99
 13 86

@@ -39,9 +39,6 @@ def paint_visible_area(turtle, tPV, vert, viewPoint, triangles):
   
   #turtle.goto(vert[0])
 
-  
-  
-
 
 def draw_poly(turtle, vert):
   for i in range(len(vert) - 1):

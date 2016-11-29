@@ -65,7 +65,7 @@ class Gui:
     read_drawing_button.pack(fill='x')
 
     clear_screen_button = tkinter.Button(self.frame, \
-      text = "Clear Drawing Area", command = self.comDesen)
+      text = "New Polygon / Clear Drawing Area", command = self.comDesen)
     clear_screen_button.pack(fill='x')
 
     close_poly_button = tkinter.Button(self.frame, \
@@ -101,17 +101,19 @@ class Gui:
       # draw lines between last point end current one
       else:
         # check if the new segment intersects others
-        if not polygon_intersection(currentPoint, vert[-1], vert):
-          draw_line(self.t, vert[-1], currentPoint)
-          # check if last 3 points are collinear
-          if len(vert) > 2 and collinear_points(vert[-2], vert[-1], currentPoint):
-            if raport(vert[-2], currentPoint, vert[-1]) < 0:
-              print("Intersection!")
-              draw_line(self.tErr,vert[-1], currentPoint)
-              self.tErr.clear()
-            else:
-              del vert[-1]
+        if not polygon_intersection(currentPoint, vert[-1], vert[:-1]):
           vert.append(currentPoint)
+          draw_line(self.t, vert[-2], currentPoint)
+          # check if last 3 points are collinear
+          if len(vert) > 2 and collinear_points(vert[-3], vert[-2], currentPoint):
+            if raport(vert[-3], vert[-2], currentPoint) < 0:
+              print("Intersection!")
+              draw_line(self.tErr, vert[-2], currentPoint)
+              self.tErr.clear()
+              del vert[-1]
+            else:
+              del vert[-2]
+          
         else:
           print("Intersection!")
           draw_line(self.tErr,vert[-1], currentPoint)
@@ -142,6 +144,9 @@ class Gui:
       for line in f:
         (x, y) = tuple(line.split())
         self.vert.append((int(x),int(y)))
+        if len(self.vert) > 2 and collinear_points(self.vert[-3], self.vert[-2], self.vert[-1]) and raport(self.vert[-3], self.vert[-2], self.vert[-1]) > 0:
+          del self.vert[-2]
+
     vert = self.vert
     
     #check for sgments intersection
@@ -149,7 +154,7 @@ class Gui:
     for i in range(2,len(vert)):
       if polygon_intersection(vert[i], vert[i-1], vert[:i-1]):
         intersection = True
-    if polygon_intersection(vert[0], vert[-1], vert):
+    if polygon_intersection(vert[0], vert[-1], vert[1:-1]):
       intersection = True
 
     if not intersection:
@@ -182,7 +187,7 @@ class Gui:
     vert = self.vert
     print(vert)
     if len(vert) > 2:
-      if not polygon_intersection(vert[0], vert[-1], vert):
+      if not polygon_intersection(vert[0], vert[-1], vert[1:-1]):
         draw_line(self.t, vert[-1], vert[0])
         self.completeDrawing = True
         self.state = 0
@@ -195,7 +200,6 @@ class Gui:
 
 
   def comTriang(self):
-    print("Buggy: need to be tested")
     self.triangles = triangulation(self.vert, self.trianglualtion_lines_turtle,\
                                    self.trianglualtion_points_turtle)
     self.stateLabel.set("Poligonul este triangulat")
@@ -203,6 +207,5 @@ class Gui:
 
 
   def comArie(self):
-    print("Not implemented!")
     self.stateLabel.set("Setati punct")
     self.state = 3
